@@ -20,7 +20,7 @@ const Login = () => {
         sessionStorage.setItem('accessToken', data.accessToken);
         sessionStorage.setItem('userId', data.user._id); // Save userId if needed
         alert('Login successful');
-        window.location.href = 'https://nf-chat-back.onrender.com/api/chats/createchat';  
+        window.location.href = 'https://nf-chat-frontend.vercel.app/createchat';  
       } else {
         alert('Login failed');
       }
