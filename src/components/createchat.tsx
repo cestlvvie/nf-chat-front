@@ -23,7 +23,7 @@ const CreateChatPage = () => {
         const data = await response.json();
         setCreatedChat(data);
         alert('Chat created successfully');
-        window.location.href = `/chats/${data._id}`;
+        window.location.href = `https://nf-chat-frontend.vercel.app/chats/${data._id}`;
       } else {
         alert('Failed to create chat');
       }
