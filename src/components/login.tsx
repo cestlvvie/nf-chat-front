@@ -20,8 +20,7 @@ const Login = () => {
         sessionStorage.setItem('accessToken', data.accessToken);
         sessionStorage.setItem('userId', data.user._id); // Save userId if needed
         alert('Login successful');
-        // Redirect to chat or home page
-        window.location.href = '/chats/createchat'; // Adjust the redirect path as needed
+        window.location.href = 'https://nf-chat-back.onrender.com/api/chats/createchat';  
       } else {
         alert('Login failed');
       }
