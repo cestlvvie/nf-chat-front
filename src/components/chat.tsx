@@ -78,17 +78,6 @@ export function Chat({ id }: ChatProps) {
         console.log('disconnected');
       });
 
-      useEffect(() => {
-        const timeout = setTimeout(() => {
-          setPartnerTyping(false);
-        }, 3000);
-  
-        return () =>{
-          clearTimeout(timeout);
-        };
-  
-      },[partnerTyping]);
-
       return () => {
         if (socket) {
           socket.disconnect();
