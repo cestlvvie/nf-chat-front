@@ -52,7 +52,7 @@ export function Chat({ id }: ChatProps) {
 
     const connectSocket = () => {
       const token = sessionStorage.getItem('accessToken');
-      const userId = sessionStorage.getItem('userId');
+      const userId = sessionStorage.getItem('userId') as string;
       if (!token || !userId) return;
 
       socket = io('https://nf-chat-back.onrender.com', {
@@ -157,9 +157,7 @@ export function Chat({ id }: ChatProps) {
         {messages.map((message) => (
           <div
             key={message._id}
-            className={`flex items-start gap-3 ${
-              message.sender === userId ? 'justify-end' : ''
-            }`}
+            className={`flex items-start gap-3 ${message.sender === userId ? 'justify-end' : ''}`}
           >
             <div className={`rounded-full bg-[#a66956] text-white flex items-center justify-center w-8 h-8`}></div>
             <div className={`bg-white text-black rounded-lg p-3 max-w-[70%] border border-gray-200 border-[#a66956] dark:border-gray-800 mb-3`}>
