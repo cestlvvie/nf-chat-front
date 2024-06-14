@@ -10,7 +10,7 @@ interface ChatProps {
 
 export function Chat({ id }: ChatProps) {
   const [messages, setMessages] = useState<any[]>([]);
-  const [participants, setParticipants] = useState<string[]>([]);
+  const [participants, setParticipants] = useState<{ [key: string]: boolean }>({});
   const [messageText, setMessageText] = useState('');
   const [partnerTyping, setPartnerTyping] = useState(false);
 
@@ -33,7 +33,12 @@ export function Chat({ id }: ChatProps) {
 
         const data = await res.json();
         setMessages(data.messages || []);
-        setParticipants(data.chat.participants || []);
+        const participantsList = data.chat.participants || [];
+        const participantsStatus = participantsList.reduce((acc: any, participant: string) => {
+          acc[participant] = false;
+          return acc;
+        }, {});
+        setParticipants(participantsStatus);
       } catch (error) {
         console.error('Error fetching chat data:', error);
       }
@@ -47,12 +52,16 @@ export function Chat({ id }: ChatProps) {
 
     const connectSocket = () => {
       const token = sessionStorage.getItem('accessToken');
-      if (!token) return;
+      const userId = sessionStorage.getItem('userId');
+      if (!token || !userId) return;
 
       socket = io('https://nf-chat-back.onrender.com', {
         extraHeaders: {
           'Authorization': `Bearer ${token}`,
         },
+        query: {
+          userId: userId,
+        }
       });
 
       socket.on('connect', () => {
@@ -62,7 +71,6 @@ export function Chat({ id }: ChatProps) {
 
       socket.on('MESSAGE', (message: any) => {
         setMessages((currentMessages) => {
-           
           if (currentMessages.find((msg) => msg._id === message._id)) {
             return currentMessages;
           }
@@ -72,6 +80,20 @@ export function Chat({ id }: ChatProps) {
 
       socket.on('PARTNER_TYPING', () => {
         setPartnerTyping(true);
+      });
+
+      socket.on(SOCKET_EVENTS.USER_ONLINE, (userId: string) => {
+        setParticipants((prevParticipants) => ({
+          ...prevParticipants,
+          [userId]: true,
+        }));
+      });
+
+      socket.on(SOCKET_EVENTS.USER_OFFLINE, (userId: string) => {
+        setParticipants((prevParticipants) => ({
+          ...prevParticipants,
+          [userId]: false,
+        }));
       });
 
       socket.on('disconnect', () => {
@@ -91,7 +113,6 @@ export function Chat({ id }: ChatProps) {
   const handleSendMessage = async () => {
     try {
       const token = sessionStorage.getItem('accessToken');
-      const userId = sessionStorage.getItem('userId');
       if (!token) {
         throw new Error('No token available');
       }
@@ -110,12 +131,10 @@ export function Chat({ id }: ChatProps) {
           throw new Error('Failed to send message');
         }
 
-        
         setMessageText('');
       }
     } catch (error) {
       console.error('Error sending message:', error);
-       
     }
   };
 
@@ -124,20 +143,15 @@ export function Chat({ id }: ChatProps) {
   return (
     <div className="flex flex-col gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-[#f3e4df] dark:border-gray-800">
       <div className="flex items-center justify-between bg-[#a66956] text-white rounded-lg px-4 py-3 border border-gray-200 border-[#a66956] dark:border-gray-800">
-        <div className="flex items-center gap-3">
-          <div className="rounded-full bg-[#d2b1a2] text-white flex items-center justify-center w-8 h-8"></div>
-          <div>
-            <h3 className="font-semibold mr-4">{participants[0]}</h3>
-            <p className="text-sm">Online</p>
+        {Object.keys(participants).map((participant) => (
+          <div key={participant} className="flex items-center gap-3">
+            <div className="rounded-full bg-[#d2b1a2] text-white flex items-center justify-center w-8 h-8"></div>
+            <div>
+              <h3 className="font-semibold">{participant}</h3>
+              <p className="text-sm">{participants[participant] ? 'Online' : 'Offline'}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="rounded-full bg-[#d2b1a2] flex items-center justify-center w-8 h-8"></div>
-          <div>
-            <h3 className="font-semibold">{participants[1]}</h3>
-            <p className="text-sm">Online</p>
-          </div>
-        </div>
+        ))}
       </div>
       <div>
         {messages.map((message) => (
