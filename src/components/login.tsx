@@ -19,7 +19,7 @@ const Login = () => {
         const data = await response.json();
         sessionStorage.setItem('accessToken', data.accessToken);
         sessionStorage.setItem('userId', data.user._id); // Save userId if needed
-        alert('Login successful');
+        alert(`Login successful! Your userId is: ${data.user._id}`);
         window.location.href = 'https://nf-chat-frontend.vercel.app/createchat';  
       } else {
         alert('Login failed');
